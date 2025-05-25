@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  webapp:
+    image: webapp-php:latest
+    # container_name: webapp-php
+    volumes:
+      - ./:/var/www/webapp
+      - ./docker/volumes/php-fpm:/sock
+
+  nginx:
+    image: webapp-nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www/webapp
+      - ./docker/volumes/php-fpm:/sock
+    links:
+      - webapp
+
+  db:
+    image: mariadb:11.7
+    container_name: webapp-mariadb
+    command: --max_allowed_packet=64M
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./docker/volumes/mariadb:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=passw0rd
+      - MYSQL_DATABASE=webapp
+
+  redis:
+    image: redis:5.0-alpine
+    ports:
+      - "6379:6379"
